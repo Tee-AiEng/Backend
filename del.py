@@ -20,17 +20,20 @@ class BasicAPI(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(payload).encode())
 
-    def do_Delete(self):
-        cotent_size =int(self.headers.get("Content-Length",0))
-        parsed_data = self.rfile.read(cotent_size)
-        del_data = json.loads(parsed_data)
-        spec_data = del_data['name']
-        req_del_data =                                                   
-        data.pop()
-        self.send_data({
-            "Message":"Data Received",
-            "data":pUT_data
-        })
+    def do_DELETE(self):
+        if data:
+           data.clear()
+      
+           self.send_data({
+            "Message":"Data Deleted",
+            "data": []
+            })
+        else:
+            self.send_data({
+                "Message": "There no data to delete"
+            })
+           
+
 
 
         

@@ -1,17 +1,18 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
-data ={
+data =[{
         "name":"Sam Larry",
         "track":"AI Developer" 
-    }
-
-
-
-data_1 = {
+    },
+    {
         "name":"YONDA ASA",
         "track":"AI Backend" 
     }
+]
+
+
+
 
 class BasicAPI(BaseHTTPRequestHandler):
     def send_data(self, payload, status = 200):
@@ -24,14 +25,22 @@ class BasicAPI(BaseHTTPRequestHandler):
         cotent_size =int(self.headers.get("Content-Length",0))
         parsed_data = self.rfile.read(cotent_size)
         pUT_data = json.loads(parsed_data)
-        data.update(pUT_data)
-        self.send_data({
-            "Message":"Data Received",
+        if data:
+            data[0] = pUT_data
+            self.send_data({
+            "Message":"Data Replaced",
+            "data":data[0]
+        })
+        else:
+          data.append(pUT_data)
+          self.send_data({
+            "Message":"Data Addeded",
             "data":pUT_data
         })
 
 
-        
+
+
 
 
 
