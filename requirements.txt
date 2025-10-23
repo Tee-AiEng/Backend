@@ -5,3 +5,6 @@ pydantic
 uvicorn
 pymysql
 sqlalchemy
+bcrypt
+jwt
+alembic

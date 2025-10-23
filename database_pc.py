@@ -13,40 +13,51 @@ db_url =db_url = f"mysql+pymysql://{os.getenv('dbuser')}:{os.getenv('dbpassword'
 
 engine = create_engine(db_url)
 
-# engine = create_engine(db_url, co)
+engine = create_engine(db_url, connect_args = {"client_flag":CLIENT.MULTI_STATEMENTS})
 session = sessionmaker(bind=engine)
 
 
 db = session()
 
 
-create_tables_users = text(""" 
+create_tables_query = text(""" 
 CREATE TABLE IF NOT EXISTS user (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL
     );
-
-""")
-create_tables_course = text(""" CREATE TABLE IF NOT EXISTS course (
+CREATE TABLE IF NOT EXISTS course (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     level VARCHAR(255) NOT NULL
     );
-    """)
-create_tables_enrollrmrnt= text("""
 CREATE TABLE IF NOT EXISTS Enrollment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     userid INT,
     courseid INT,
     FOREIGN KEY (userid) REFERENCES user(id),
     FOREIGN KEY (courseid) REFERENCES course(id)
-    );
-    """)
-db.execute(create_tables_users)
+    );                          
+""")
+# create_tables_course = text(""" CREATE TABLE IF NOT EXISTS course (
+#     id INT AUTO_INCREMENT PRIMARY KEY,
+#     title VARCHAR(255) NOT NULL,
+#     level VARCHAR(255) NOT NULL
+#     );
+#     """)
+# create_tables_enrollrmrnt= text("""
+# CREATE TABLE IF NOT EXISTS Enrollment (
+#     id INT AUTO_INCREMENT PRIMARY KEY,
+#     userid INT,
+#     courseid INT,
+#     FOREIGN KEY (userid) REFERENCES user(id),
+#     FOREIGN KEY (courseid) REFERENCES course(id)
+#     );
+#     """)
+db.execute(create_tables_query)
 print("Tables habe been created sucessfully")
-db.execute(create_tables_course)
-print("Tables habe been created sucessfully")
-db.execute(create_tables_enrollrmrnt)
-print("Tables habe been created sucessfully")
+# db.execute(create_tables_course)
+# print("Tables habe been created sucessfully")
+# db.execute(create_tables_enrollrmrnt)
+# print("Tables habe been created sucessfully")
