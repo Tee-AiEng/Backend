@@ -6,11 +6,14 @@ import os
 from dotenv import load_dotenv
 import uvicorn
 import bcrypt
+from middleware import create_token
 
 
 load_dotenv()
 
 app = FastAPI(title="Simple API", version="1.0.0")
+
+token_time = os.getenv("token_time")
 
 class Simple(BaseModel):
     name: str = Field(..., example="Sam Larry")
@@ -65,13 +68,20 @@ def login(input:loginrequest):
 
         if not result:
             raise HTTPException(status_code=400, detail="Invalid email or password")
+        
         verified_password = bcrypt.checkpw(input.password.encode("utf-8"), result.password.encode("utf-8"))
 
         if not verified_password:
             raise HTTPException(status_code=400, detail="Invalid email or password")
         
+
+        encoded_token = create_token(details={"email":result.email,"usertype":result.usertype}, token_time)
+        
+
+
         return {
-            "message":"Login Sucessful"
+            "message":"Login Sucessful",
+            "token": encoded_token
         }
 
 

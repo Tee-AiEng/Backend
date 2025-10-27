@@ -6,5 +6,5 @@ uvicorn
 pymysql
 sqlalchemy
 bcrypt
-jwt
+pyjwt
 alembic
