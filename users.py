@@ -7,19 +7,25 @@ from dotenv import load_dotenv
 import uvicorn
 import bcrypt
 from middleware import create_token
+from middleware import verify_token
+from fastapi import Depends
 
 
 load_dotenv()
 
 app = FastAPI(title="Simple API", version="1.0.0")
 
-token_time = os.getenv("token_time")
+token_time = int(os.getenv("token_time"))
 
 class Simple(BaseModel):
     name: str = Field(..., example="Sam Larry")
     email: str = Field(..., example="sam@email.com")
     password: str = Field(..., example="sam123")
     usertype : str = Field(...,example="student")
+
+class valid(BaseModel):
+    course_title: str = Field(...,example="Backend Devloper")
+    level: str = Field(...,example="300 level")
 
 @app.post("/signup")
 def signup(input: Simple):
@@ -75,7 +81,7 @@ def login(input:loginrequest):
             raise HTTPException(status_code=400, detail="Invalid email or password")
         
 
-        encoded_token = create_token(details={"email":result.email,"usertype":result.usertype}, token_time)
+        encoded_token = create_token(details={"email":result.email,"usertype":result.usertype},expiry=token_time)
         
 
 
@@ -87,6 +93,35 @@ def login(input:loginrequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+class valid(BaseModel):
+    title: str = Field(...,example="Backend Devloper")
+    level: str = Field(...,example="300 level")
+    
+@app.post("/courses")
+def addcourse(input:valid, user_data= Depends(verify_token)):
+    try:
+        print(user_data)
+        if user_data["usertype"] != "admin":
+            raise HTTPException(status_code=401, detail="You arent authorized to add a course")
+
+        query=text("""
+            INSERT INTO course(title,level)
+                VALUES(:title,:level)
+""")
+        db.execute(query, {"title":input.title, "level":input.level})
+        db.commit()
+    
+        return {
+        "message": "Course created sucessfully",
+        "data": {
+            "title":input.title, 
+            "level":input.level
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host=os.getenv("host"), port=int(os.getenv("port")))

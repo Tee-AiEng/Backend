@@ -2,12 +2,17 @@ import jwt
 from dotenv import load_dotenv
 import os
 load_dotenv()
-from datetime import datetime
+from fastapi import Request
+from datetime import datetime,timedelta
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Security
+
+bearer=HTTPBearer()
 
 secret_key = os.getenv("secret_key")
 
-def create_token(details,expiry):
-    expire =datetime.now() + expiry
+def create_token(details:dict, expiry:int):
+    expire = datetime.now() + timedelta(minutes=expiry)
 
 
     details.update({"exp":expire})
@@ -15,3 +20,16 @@ def create_token(details,expiry):
     encoded_jwt = jwt.encode(details, secret_key)
 
     return encoded_jwt
+
+def verify_token(request: HTTPAuthorizationCredentials = Security(bearer)):
+
+    token= request.credentials
+
+    verified_token = jwt.decode(token, secret_key, algorithms=["HS256"])
+   
+
+    return {
+        "email":verified_token.get("email"),
+        "usertype": verified_token.get("usertype")
+
+    }
