@@ -22,7 +22,7 @@ def upgrade() -> None:
     """Upgrade schema."""
     op.execute("""
     ALTER TABLE user
-    ADD COLUMN gender varchar(100) DEFAULT "male"
+    ADD COLUMN gender varchar(100) DEFAULT "male" 
 """)
     pass
 

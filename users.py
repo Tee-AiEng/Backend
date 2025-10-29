@@ -28,7 +28,7 @@ class valid(BaseModel):
     level: str = Field(...,example="300 level")
 
 @app.post("/signup")
-def signup(input: Simple):
+def signup(input: Simple):     
     try:
         
         duplicate_query = text(
@@ -81,7 +81,7 @@ def login(input:loginrequest):
             raise HTTPException(status_code=400, detail="Invalid email or password")
         
 
-        encoded_token = create_token(details={"email":result.email,"usertype":result.usertype},expiry=token_time)
+        encoded_token = create_token(details={"id":result.id,"email":result.email,"usertype":result.usertype},expiry=token_time)
         
 
 
@@ -117,6 +117,34 @@ def addcourse(input:valid, user_data= Depends(verify_token)):
         "data": {
             "title":input.title, 
             "level":input.level
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class id(BaseModel):
+    courseid: int = Field(..., example= 1)
+
+@app.post("/enroll")
+def enrollcourse(input:id, user_data = Depends(verify_token)):
+    try:
+        print(user_data)
+        if user_data["usertype"] != "student":
+            raise HTTPException(status_code=401, detail="You are not authorized to enroll for a course")
+        
+        query=text("""
+            INSERT INTO Enrollment(userid,courseid)
+                VALUES(:userid,:courseid)
+                   """)
+        db.execute(query, {"userid":user_data["id"], "courseid":input.courseid})
+        db.commit()
+
+        return {
+        "message": "Course created sucessfully",
+        "data": {
+            "userid":user_data["id"], 
+            "courseid":input.courseid
             }
         }
     except Exception as e:
